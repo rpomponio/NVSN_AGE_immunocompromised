@@ -57,8 +57,7 @@ tab1 <- tab1 |>
     columns="label",
     rows=variable=="c_season" & row_type=="label")
 
-# append table to README.md
-as_kable(tab1, format="pipe") |>
-  cat(file="README.md", append=TRUE)
+# copy/paste table to README.md
+as_kable(tab1, format="pipe") |> writeClipboard()
 
 # next: stool results and self-reported symptoms
