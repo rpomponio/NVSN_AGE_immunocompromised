@@ -39,13 +39,26 @@ dat[, c_admitted:=factor(c_carelevel<=2, c(TRUE, FALSE), c("Admitted", "ED-only"
 dat[, c_insurech:=factor(c_insurech, 0:3, c("Public", "Private", "Both",
                                             "No insurance"))]
 
+# technically part of Table 2--laboratory confirmed detections
+dat[!is.na(rtpcr_norogi) & !is.na(rtpcr_norogii), c_norovirus:=fcase(
+  rtpcr_norogi==1, "Positive",
+  rtpcr_norogii==1, "Positive",
+  rtpcr_norogi==0 & rtpcr_norogii==0, "Negative",
+  default="Inconclusive")]
+dat[!is.na(rtpcr_result), c_rotavirus:=fcase(
+  rtpcr_result==1, "Positive",
+  rtpcr_result==0, "Negative",
+  default="Inconclusive")]
+
 # mockup of Table 1 (inlcuding unknown IC status)
 tab1 <- tbl_summary(
   dat,
   by=c_immcomp,
   label=list(c_season="AGE Season", c_studysite="Site", c_agemonths="Age, months",
-             c_insurech="Insurance type", c_admitted="Final status"),
-  include=c(c_season, c_studysite, c_agemonths, c_insurech, c_admitted))
+             c_insurech="Insurance type", c_admitted="Final status",
+             c_norovirus="Norovirus", c_rotavirus="Rotavirus"),
+  include=c(c_season, c_studysite, c_agemonths, c_insurech, c_admitted,
+            c_norovirus, c_rotavirus))
 
 # adding footnotes to table
 tab1 <- tab1 |>
@@ -55,9 +68,13 @@ tab1 <- tab1 |>
   modify_footnote_body(
     footnote="Partial season data for 2025-26, up to/including Jan 31, 2026",
     columns="label",
-    rows=variable=="c_season" & row_type=="label")
+    rows=variable=="c_season" & row_type=="label") |>
+  modify_footnote_body(
+    footnote="Results from RT-PCR testing after stool sample collection",
+    columns="label",
+    rows=variable %in% c("c_norovirus", "c_rotavirus") & row_type=="label")
 
 # copy/paste table to README.md
 as_kable(tab1, format="pipe") |> writeClipboard()
 
-# next: stool results and self-reported symptoms
+# next add self-reported symptoms

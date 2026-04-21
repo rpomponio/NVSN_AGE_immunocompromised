@@ -43,3 +43,13 @@ Finally, one needs to obtain a copy of the latest dataset from CDC. As of April 
 |Final status       |                                      |                                |                            |
 |Admitted           |             2,184 (51%)              |           187 (94%)            |          45 (49%)          |
 |ED-only            |             2,105 (49%)              |           11 (5.6%)            |          46 (51%)          |
+|Norovirus (lab)    |                                      |                                |                            |
+|Inconclusive       |               3 (0.1%)               |             0 (0%)             |           0 (0%)           |
+|Negative           |             2,327 (79%)              |           126 (85%)            |          50 (78%)          |
+|Positive           |              607 (21%)               |            23 (15%)            |          14 (22%)          |
+|Unknown            |                1,352                 |               49               |             27             |
+|Rotavirus (lab)    |                                      |                                |                            |
+|Inconclusive       |               4 (0.1%)               |             0 (0%)             |           0 (0%)           |
+|Negative           |             2,684 (91%)              |           144 (97%)            |          57 (89%)          |
+|Positive           |              249 (8.5%)              |            5 (3.4%)            |          7 (11%)           |
+|Unknown            |                1,352                 |               49               |             27             |
