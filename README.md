@@ -2,10 +2,22 @@
 
 ## Objectives
 
-- describe epidemiology of AGE cases in enrolled immunocompromised (IC) hosts, looking at baseline characteristics of IC hosts enrolled in AGE compared to immunocompetent peers enrolled during the same period.
+- Describe the epidemiology of AGE cases in enrolled immunocompromised (IC) hosts
 
+## Requirements
 
-## Results (preliminary)
+In order to run the code in this repository, one must install `R` which is freely available. It is recommended to use [R studio](https://posit.co/download/rstudio-desktop) for ease of coding.
+
+Additionally the following packages will be required:
+
+- `haven` (for reading SAS dataset)
+- `data.table`
+- `gtsummary`
+- `ggplot2`
+
+Finally, one needs to obtain a copy of the latest dataset from CDC. As of April 2026, that file was named `pitt_20260413.sas7bdat`. Copy this file to the main folder in this repository.
+
+## Overview
 
 |**Characteristic** | **Not immunocompromised**  N = 4,289 | **Immunocompromised**  N = 198 | **Status Unknown**  N = 91 |
 |:------------------|:------------------------------------:|:------------------------------:|:--------------------------:|
