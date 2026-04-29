@@ -15,7 +15,11 @@ Additionally the following packages will be required:
 - `gtsummary`
 - `ggplot2`
 
-Finally, one needs to obtain a copy of the latest dataset from CDC. As of April 2026, that file was named `pitt_20260413.sas7bdat`. Copy this file to the main folder in this repository.
+Finally, one needs to obtain a copy of the latest dataset from CDC. Copy this file from the following password-protected link:
+
+<https://upmchs-my.sharepoint.com/:u:/r/personal/snyderjn4_upmc_edu/Documents/Norovirus%20in%20IC%20Patients/Datasets/ShareFile%20Download%20Apr%202026/pitt_20260413.sas7bdat?csf=1&web=1&e=oouQB4>
+
+The file should be `pitt_20260413.sas7bdat` and stored in the same folder as the code for this repository.
 
 ## Questions for CDC
 
