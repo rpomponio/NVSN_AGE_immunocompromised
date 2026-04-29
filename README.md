@@ -17,39 +17,62 @@ Additionally the following packages will be required:
 
 Finally, one needs to obtain a copy of the latest dataset from CDC. As of April 2026, that file was named `pitt_20260413.sas7bdat`. Copy this file to the main folder in this repository.
 
+## Questions for CDC
+
+1. Confirm NO availability of Astro/Sapovirus results?
+  - `bf_astro`
+  - `bf_sapo`
+2. Aware that Seattle is marking "Unknown" for IC status?
+  - Site represents 10% of non-IC enrollees but >75% of unknown status enrollees
+3. Confirm variables correct for following assumptions:
+  - Stool result available if either `rtpcr_norotdat` or `rtpcr_rotatdat`
+  - Rotavirus result is stored in `rtpcr_result`
+  - Norovirus results can be synthesized across `rtpcr_norogii` and `rtpcr_norogi`
+
 ## Overview
 
-|**Characteristic** | **Not immunocompromised**  N = 4,289 | **Immunocompromised**  N = 198 | **Status Unknown**  N = 91 |
-|:------------------|:------------------------------------:|:------------------------------:|:--------------------------:|
-|AGE Season         |                                      |                                |                            |
-|2023-24            |              269 (6.3%)              |            5 (2.5%)            |           0 (0%)           |
-|2024-25            |             3,002 (70%)              |           128 (65%)            |          75 (82%)          |
-|2025-26            |             1,018 (24%)              |            65 (33%)            |          16 (18%)          |
-|Site               |                                      |                                |                            |
-|Vanderbilt         |             1,331 (31%)              |           15 (7.6%)            |           0 (0%)           |
-|Rochester          |              234 (5.5%)              |            4 (2.0%)            |          1 (1.1%)          |
-|Cincinnati         |              315 (7.3%)              |            2 (1.0%)            |          1 (1.1%)          |
-|Seattle            |              470 (11%)               |           12 (6.1%)            |          70 (77%)          |
-|Houston            |              997 (23%)               |           126 (64%)            |          15 (16%)          |
-|Kansas City        |              470 (11%)               |            29 (15%)            |          4 (4.4%)          |
-|Pittsburgh         |              472 (11%)               |           10 (5.1%)            |           0 (0%)           |
-|Age, months        |             29 (11, 76)              |          69 (32, 132)          |        57 (17, 107)        |
-|Insurance type     |                                      |                                |                            |
-|Public             |             2,837 (66%)              |           112 (57%)            |          47 (52%)          |
-|Private            |             1,101 (26%)              |            65 (33%)            |          33 (36%)          |
-|Both               |              104 (2.4%)              |            9 (4.5%)            |          6 (6.6%)          |
-|No insurance       |              233 (5.5%)              |           12 (6.1%)            |          5 (5.5%)          |
-|Unknown            |                  14                  |               0                |             0              |
-|Final status       |                                      |                                |                            |
-|Admitted           |             2,184 (51%)              |           187 (94%)            |          45 (49%)          |
-|ED-only            |             2,105 (49%)              |           11 (5.6%)            |          46 (51%)          |
-|Norovirus (lab)    |                                      |                                |                            |
-|Inconclusive       |               3 (0.1%)               |             0 (0%)             |           0 (0%)           |
-|Negative           |             2,327 (79%)              |           126 (85%)            |          50 (78%)          |
-|Positive           |              607 (21%)               |            23 (15%)            |          14 (22%)          |
-|Unknown            |                1,352                 |               49               |             27             |
-|Rotavirus (lab)    |                                      |                                |                            |
-|Inconclusive       |               4 (0.1%)               |             0 (0%)             |           0 (0%)           |
-|Negative           |             2,684 (91%)              |           144 (97%)            |          57 (89%)          |
-|Positive           |              249 (8.5%)              |            5 (3.4%)            |          7 (11%)           |
-|Unknown            |                1,352                 |               49               |             27             |
+|**Characteristic**             | **Not immunocompromised**  N = 4,020 | **Immunocompromised**  N = 193 | **Status Unknown**  N = 91 |
+|:------------------------------|:------------------------------------:|:------------------------------:|:--------------------------:|
+|Baseline Characteristics       |                                      |                                |                            |
+|AGE Season                     |                                      |                                |                            |
+|2024-25                        |             3,002 (75%)              |           128 (66%)            |          75 (82%)          |
+|2025-26                        |             1,018 (25%)              |            65 (34%)            |          16 (18%)          |
+|Site                           |                                      |                                |                            |
+|Vanderbilt                     |             1,260 (31%)              |           15 (7.8%)            |           0 (0%)           |
+|Rochester                      |              227 (5.6%)              |            4 (2.1%)            |          1 (1.1%)          |
+|Cincinnati                     |              301 (7.5%)              |            2 (1.0%)            |          1 (1.1%)          |
+|Seattle                        |              408 (10%)               |           12 (6.2%)            |          70 (77%)          |
+|Houston                        |              930 (23%)               |           124 (64%)            |          15 (16%)          |
+|Kansas City                    |              442 (11%)               |            26 (13%)            |          4 (4.4%)          |
+|Pittsburgh                     |              452 (11%)               |           10 (5.2%)            |           0 (0%)           |
+|Age, months                    |             29 (11, 77)              |          69 (31, 132)          |        57 (17, 107)        |
+|Insurance type                 |                                      |                                |                            |
+|Public                         |             2,655 (66%)              |           110 (57%)            |          47 (52%)          |
+|Private                        |             1,034 (26%)              |            64 (33%)            |          33 (36%)          |
+|Both                           |              100 (2.5%)              |            9 (4.7%)            |          6 (6.6%)          |
+|No insurance                   |              217 (5.4%)              |           10 (5.2%)            |          5 (5.5%)          |
+|Unknown                        |                  14                  |               0                |             0              |
+|Self-reported Symptoms         |                                      |                                |                            |
+|Fever                          |             2,188 (54%)              |           120 (62%)            |          38 (42%)          |
+|Diarrhea                       |             2,185 (54%)              |           113 (59%)            |          43 (47%)          |
+|Vomiting                       |             3,570 (89%)              |           151 (78%)            |          85 (93%)          |
+|Outcomes                       |                                      |                                |                            |
+|Final hospitalization status   |                                      |                                |                            |
+|Admitted                       |             2,061 (51%)              |           183 (95%)            |          45 (49%)          |
+|ED-only                        |             1,959 (49%)              |           10 (5.2%)            |          46 (51%)          |
+|Inpatient length of stay, days |               2 (1, 3)               |            3 (2, 9)            |          2 (1, 3)          |
+|Unknown                        |                1,914                 |               9                |             46             |
+|Lab Results                    |                                      |                                |                            |
+|RT-PCR Availability            |                                      |                                |                            |
+|Not Tested                     |             1,265 (31%)              |            47 (24%)            |          27 (30%)          |
+|Tested                         |             2,755 (69%)              |           146 (76%)            |          64 (70%)          |
+|Norovirus                      |                                      |                                |                            |
+|Inconclusive                   |               3 (0.1%)               |             0 (0%)             |           0 (0%)           |
+|Negative                       |             2,185 (79%)              |           123 (84%)            |          50 (78%)          |
+|Positive                       |              567 (21%)               |            23 (16%)            |          14 (22%)          |
+|Unknown                        |                1,265                 |               47               |             27             |
+|Rotavirus                      |                                      |                                |                            |
+|Inconclusive                   |               3 (0.1%)               |             0 (0%)             |           0 (0%)           |
+|Negative                       |             2,512 (91%)              |           141 (97%)            |          57 (89%)          |
+|Positive                       |              240 (8.7%)              |            5 (3.4%)            |          7 (11%)           |
+|Unknown                        |                1,265                 |               47               |             27             |
