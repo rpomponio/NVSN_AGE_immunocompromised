@@ -2,7 +2,7 @@
 
 ## Objectives
 
-- Describe the epidemiology of AGE cases in enrolled immunocompromised (IC) hosts
+- Describe the epidemiology of AGE cases in enrolled immunocompromised (IC) hosts.
 
 ## Requirements
 
@@ -21,17 +21,13 @@ Finally, one needs to obtain a copy of the latest dataset from CDC. Copy this fi
 
 The file should be `pitt_20260413.sas7bdat` and stored in the same folder as the code for this repository.
 
-## Questions for CDC
+## Answers from CDC
 
-1. Confirm NO availability of Astro/Sapovirus results?
-  - `bf_astro`
-  - `bf_sapo`
-2. Aware that Seattle is marking "Unknown" for IC status?
-  - Site represents 10% of non-IC enrollees but >75% of unknown status enrollees
-3. Confirm variables correct for following assumptions:
-  - Stool result available if either `rtpcr_norotdat` or `rtpcr_rotatdat`
-  - Rotavirus result is stored in `rtpcr_result`
-  - Norovirus results can be synthesized across `rtpcr_norogii` and `rtpcr_norogi`
+`bf_astro` / `bf_sapo` are from BIOFIRE assays--currently no sites are testing this way
+
+Mary to ask Seattle about IC Status types "Unknown"...
+
+Claire to present summary of IC enrollment at Annual Meeting (will share prior to 5/12)
 
 ## Overview
 
