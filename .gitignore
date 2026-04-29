@@ -50,3 +50,4 @@ rsconnect/
 
 # Added by Ray -- prevent commits of datasets containing PHI
 *.sas7bdat
+*.csv
