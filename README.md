@@ -6,82 +6,58 @@
 
 ## Requirements
 
-In order to run the code in this repository, one must install `R` which is freely available. It is recommended to use [R studio](https://posit.co/download/rstudio-desktop) for ease of coding.
+### Software
 
-Additionally the following packages will be required:
+Install [R](https://www.r-project.org) and [RStudio](https://posit.co/download/rstudio-desktop) (recommended).
 
-- `haven` (for reading SAS dataset)
-- `data.table`
-- `gtsummary`
-- `ggplot2`
+The following R packages are required. Install them once from the R console:
 
-Finally, one needs to obtain a copy of the latest dataset from CDC. Copy this file from the following password-protected link:
+```r
+install.packages(c("haven", "data.table", "gtsummary", "ggplot2", "officer", "flextable"))
+```
+
+### Data
+
+Obtain the latest dataset from CDC via the following password-protected link:
 
 <https://upmchs-my.sharepoint.com/:u:/r/personal/snyderjn4_upmc_edu/Documents/Norovirus%20in%20IC%20Patients/Datasets/ShareFile%20Download%20Apr%202026/pitt_20260413.sas7bdat?csf=1&web=1&e=oouQB4>
 
-The file should be `pitt_20260413.sas7bdat` and stored in the same folder as the code for this repository.
+Save the file as `pitt_20260413.sas7bdat` in the same folder as the scripts.
+
+## Reproducing the Analysis
+
+Run the scripts in the following order:
+
+**Step 1 — Generate tables**
+
+Open and run `prelim.R`. This script:
+
+- Reads and filters the SAS dataset to the study period (October 2024 onward)
+- Derives all analytic variables (demographics, outcomes, virology)
+- Produces two `gtsummary` table objects in the R environment:
+  - `tab.demo` — Table 1: demographic and baseline characteristics
+  - `tab.outcomes` — Table 2: clinical outcomes and laboratory results
+
+**Step 2 — Export to Word**
+
+Open and run `export.R`. This script:
+
+- Sources `prelim.R` automatically
+- Exports both tables to a single Word document (`prelim_immunocomp_tables.docx`), one table per page
+
+The output file will be saved in the working directory. To check or set the working directory in RStudio, use `getwd()` and `setwd()`.
+
+## Notes
+
+- Patients with unknown immunocompromised status (N=91) are excluded from the presentation tables but retained in the full dataset for downstream use.
+- Season data for 2025-26 is partial through January 31, 2026.
+- Laboratory virology results use RT-PCR preferentially; clinical test results are used only when RT-PCR is unavailable. Inconclusive results are treated as missing.
+- Code was written with assistance from Claude (Anthropic); all analytical decisions were made by the author.
 
 ## Answers from CDC
 
-`bf_astro` / `bf_sapo` are from BIOFIRE assays--currently no sites are testing this way
+`bf_astro` / `bf_sapo` are from BIOFIRE assays (currently no sites are testing with this assay)
 
 Mary to ask Seattle about IC Status types "Unknown"...
 
 Claire to present summary of IC enrollment at Annual Meeting (will share prior to 5/12)
-
-## Overview
-
-|**Characteristic**              | **Not immunocompromised**  N = 4,020 | **Immunocompromised**  N = 193 | **Status Unknown**  N = 91 |
-|:-------------------------------|:------------------------------------:|:------------------------------:|:--------------------------:|
-|**Baseline Characteristics**    |                                      |                                |                            |
-|AGE Season                      |                                      |                                |                            |
-|2024-25                         |             3,002 (75%)              |           128 (66%)            |          75 (82%)          |
-|2025-26                         |             1,018 (25%)              |            65 (34%)            |          16 (18%)          |
-|Site                            |                                      |                                |                            |
-|Vanderbilt                      |             1,260 (31%)              |           15 (7.8%)            |           0 (0%)           |
-|Rochester                       |              227 (5.6%)              |            4 (2.1%)            |          1 (1.1%)          |
-|Cincinnati                      |              301 (7.5%)              |            2 (1.0%)            |          1 (1.1%)          |
-|Seattle                         |              408 (10%)               |           12 (6.2%)            |          70 (77%)          |
-|Houston                         |              930 (23%)               |           124 (64%)            |          15 (16%)          |
-|Kansas City                     |              442 (11%)               |            26 (13%)            |          4 (4.4%)          |
-|Pittsburgh                      |              452 (11%)               |           10 (5.2%)            |           0 (0%)           |
-|Age, months                     |             29 (11, 77)              |          69 (31, 132)          |        57 (17, 107)        |
-|Insurance type                  |                                      |                                |                            |
-|Public                          |             2,655 (66%)              |           110 (57%)            |          47 (52%)          |
-|Private                         |             1,034 (26%)              |            64 (33%)            |          33 (36%)          |
-|Both                            |              100 (2.5%)              |            9 (4.7%)            |          6 (6.6%)          |
-|No insurance                    |              217 (5.4%)              |           10 (5.2%)            |          5 (5.5%)          |
-|Unknown                         |                  14                  |               0                |             0              |
-|**Self-reported Symptoms**      |                                      |                                |                            |
-|Fever                           |             2,188 (54%)              |           120 (62%)            |          38 (42%)          |
-|Diarrhea                        |             2,185 (54%)              |           113 (59%)            |          43 (47%)          |
-|Vomiting                        |             3,570 (89%)              |           151 (78%)            |          85 (93%)          |
-|**Outcomes**                    |                                      |                                |                            |
-|Final hospitalization status    |                                      |                                |                            |
-|Admitted                        |             2,061 (51%)              |           183 (95%)            |          45 (49%)          |
-|ED-only                         |             1,959 (49%)              |           10 (5.2%)            |          46 (51%)          |
-|Inpatient length of stay, days  |               2 (1, 3)               |            3 (2, 9)            |          2 (1, 3)          |
-|Unknown                         |                1,914                 |               9                |             46             |
-|**Lab Results**                 |                                      |                                |                            |
-|RT-PCR Availability             |                                      |                                |                            |
-|Not Collected                   |             1,228 (31%)              |            46 (24%)            |          27 (30%)          |
-|Not Tested                      |              37 (0.9%)               |            1 (0.5%)            |           0 (0%)           |
-|Tested                          |             2,755 (69%)              |           146 (76%)            |          64 (70%)          |
-|Clinical Testing Availability   |                                      |                                |                            |
-|Not Available                   |             3,586 (90%)              |           117 (61%)            |          80 (88%)          |
-|Tested                          |              417 (10%)               |            76 (39%)            |          11 (12%)          |
-|Unknown                         |                  17                  |               0                |             0              |
-|Norovirus                       |                                      |                                |                            |
-|Inconclusive or Clinically Neg. |              75 (2.6%)               |           10 (6.3%)            |          1 (1.5%)          |
-|Negative                        |             2,175 (77%)              |           122 (77%)            |          50 (77%)          |
-|Positive                        |              590 (21%)               |            26 (16%)            |          14 (22%)          |
-|Unknown                         |                1,180                 |               35               |             26             |
-|Rotavirus                       |                                      |                                |                            |
-|Inconclusive or Clinically Neg. |              82 (2.9%)               |           12 (7.6%)            |          1 (1.5%)          |
-|Negative                        |             2,504 (88%)              |           141 (89%)            |          57 (88%)          |
-|Positive                        |              254 (8.9%)              |            5 (3.2%)            |          7 (11%)           |
-|Unknown                         |                1,180                 |               35               |             26             |
-|Bacterial Pathogens             |                                      |                                |                            |
-|Negative                        |              261 (69%)               |            42 (56%)            |          7 (64%)           |
-|Positive                        |              120 (31%)               |            33 (44%)            |          4 (36%)           |
-|Unknown                         |                3,639                 |              118               |             80             |
