@@ -9,8 +9,9 @@
 ################################################### -
 
 library(ggplot2)
+library(ggpattern)
 library(data.table)
-library(patchwork)
+library(scales)
 theme_set(theme_classic(base_size=14))
 
 # run analysis script to produce prelim and prelim.tested
@@ -35,27 +36,54 @@ theme.fig <- function() {
     strip.text=element_text(face="bold"))
 }
 
-# ── Fig 1: Admission rate ─────────────────────────────────────────────────────
+# ── Fig 1: Admission rate + ICU rate (combined) ───────────────────────────────
 
-# compute admission rate per group
-fig1.dat <- prelim[, .(
-  n.admitted=sum(d_admitted=="Admitted", na.rm=TRUE),
-  n.total=.N
+# admission rate: all patients
+fig1.adm <- prelim[, .(
+  outcome="Hospitalization",
+  pct=mean(d_admitted=="Admitted", na.rm=TRUE) * 100,
+  n.num=sum(d_admitted=="Admitted", na.rm=TRUE),
+  n.den=.N
 ), by=d_immcomp]
-fig1.dat[, pct:=n.admitted / n.total * 100]
-fig1.dat[, label:=paste0(round(pct, 0), "%\n(", n.admitted, "/", n.total, ")")]
 
-fig1 <- ggplot(fig1.dat, aes(x=d_immcomp, y=pct, fill=d_immcomp)) +
-  geom_col(width=0.5, show.legend=FALSE) +
-  geom_text(aes(label=label), vjust=-0.4, size=4.5, fontface="bold") +
-  scale_fill_manual(values=GROUP.COLORS) +
-  scale_x_discrete(labels=GROUP.LABELS) +
-  scale_y_continuous(limits=c(0, 110), expand=c(0, 0),
+# ICU rate: admitted patients only
+fig1.icu <- prelim[d_admitted=="Admitted" & !is.na(d_icu), .(
+  outcome="ICU Admission",
+  pct=mean(d_icu=="Yes") * 100,
+  n.num=sum(d_icu=="Yes"),
+  n.den=.N
+), by=d_immcomp]
+
+fig1.dat <- rbindlist(list(fig1.adm, fig1.icu))
+fig1.dat[, outcome:=factor(outcome, c("Hospitalization", "ICU Admission"))]
+fig1.dat[, label:=paste0(round(pct, 0), "%\n(", n.num, "/", n.den, ")")]
+fig1.dat[, pattern:=ifelse(outcome=="ICU Admission", "crosshatch", "none")]
+
+fig1 <- ggplot(fig1.dat,
+               aes(x=outcome, y=pct, fill=d_immcomp, pattern=pattern,
+                   group=d_immcomp)) +
+  geom_bar_pattern(
+    stat="identity",
+    position=position_dodge(width=0.6),
+    width=0.55,
+    colour="grey30",           # bar border color
+    pattern_colour="grey20",   # crosshatch line color — dark on light fill
+    pattern_fill=NA,           # no fill between lines
+    pattern_density=0.08,      # controls line thickness
+    pattern_spacing=0.015,     # controls spacing between lines
+    pattern_angle=45) +        # 45+135 degree lines = crosshatch
+  geom_text(aes(label=label),
+            position=position_dodge(width=0.6),
+            vjust=-0.3, size=3.8, fontface="bold") +
+  scale_fill_manual(values=GROUP.COLORS, labels=GROUP.LABELS) +
+  scale_pattern_identity() +
+  scale_y_continuous(limits=c(0, 115), expand=c(0, 0),
                      labels=function(x) paste0(x, "%")) +
-  labs(title="Hospitalization rate",
-       subtitle="Admitted vs. ED-only by immunocompromised status",
-       x=NULL, y="% Admitted") +
-  theme.fig()
+  labs(title="Hospitalization and ICU admission rates",
+       subtitle="Solid bars = hospitalization (all patients); crosshatch = ICU (admitted patients only)",
+       x=NULL, y="Rate (%)") +
+  theme.fig() +
+  guides(fill=guide_legend(override.aes=list(pattern="none")))
 
 # ── Fig 2: Age distribution ───────────────────────────────────────────────────
 
@@ -70,69 +98,59 @@ fig2 <- ggplot(prelim, aes(x=d_immcomp, y=d_agemonths, fill=d_immcomp)) +
        x=NULL, y="Age, months") +
   theme.fig()
 
-# ── Fig 3: Severity cascade (admitted only) ───────────────────────────────────
+# ── Fig 3: Length of stay (admitted only) ─────────────────────────────────────
 
-# LOS: median per group
-fig3a.dat <- prelim[d_admitted=="Admitted", .(
-  median.los=median(d_los, na.rm=TRUE),
-  q1=quantile(d_los, 0.25, na.rm=TRUE),
-  q3=quantile(d_los, 0.75, na.rm=TRUE)
-), by=d_immcomp]
-
-fig3a <- ggplot(fig3a.dat, aes(x=d_immcomp, y=median.los,
-                               ymin=q1, ymax=q3, color=d_immcomp)) +
-  geom_pointrange(size=1.1, show.legend=FALSE) +
-  scale_color_manual(values=GROUP.COLORS) +
-  scale_x_discrete(labels=GROUP.LABELS) +
-  labs(title="Length of stay",
-       subtitle="Median (IQR), admitted patients",
-       x=NULL, y="Days") +
-  theme.fig()
-
-# ICU admission rate per group
-fig3b.dat <- prelim[d_admitted=="Admitted" & !is.na(d_icu), .(
-  pct.icu=mean(d_icu=="Yes") * 100,
-  n=.N
-), by=d_immcomp]
-fig3b.dat[, label:=paste0(round(pct.icu, 0), "%")]
-
-fig3b <- ggplot(fig3b.dat, aes(x=d_immcomp, y=pct.icu, fill=d_immcomp)) +
-  geom_col(width=0.5, show.legend=FALSE) +
-  geom_text(aes(label=label), vjust=-0.4, size=4.5, fontface="bold") +
+# pseudo-log transformation handles zeros natively; sigma controls the linear
+# region around zero (default sigma=1 works well for integer day counts)
+fig3 <- ggplot(prelim[d_admitted=="Admitted"],
+               aes(x=d_immcomp, y=d_los, fill=d_immcomp)) +
+  geom_violin(alpha=0.4, trim=TRUE, adjust=2.5, show.legend=FALSE) +
+  geom_boxplot(width=0.15, outlier.shape=NA, show.legend=FALSE) +
   scale_fill_manual(values=GROUP.COLORS) +
   scale_x_discrete(labels=GROUP.LABELS) +
-  scale_y_continuous(limits=c(0, 30), expand=c(0, 0),
-                     labels=function(x) paste0(x, "%")) +
-  labs(title="ICU admission",
-       subtitle="% admitted to ICU",
-       x=NULL, y="% ICU") +
+  scale_y_continuous(
+    trans=pseudo_log_trans(sigma=1, base=10),
+    breaks=c(0, 10, 50, 100, 150),
+    labels=as.character(c(0, 10, 50, 100, 150))) +
+  labs(title="Length of stay",
+       subtitle="Admitted patients only; pseudo-log scale",
+       x=NULL, y="Days (pseudo-log scale)") +
   theme.fig()
 
-# combine LOS and ICU side by side using patchwork
-fig3 <- fig3a + fig3b +
-  plot_annotation(
-    title="Among admitted patients",
-    theme=theme(plot.title=element_text(face="bold", size=14)))
-
-# ── Fig 4: Site enrollment ────────────────────────────────────────────────────
+# ── Fig 4: Site enrollment (stacked horizontal bars) ─────────────────────────
 
 fig4.dat <- prelim[, .(n=.N), by=.(d_immcomp, d_studysite)]
 fig4.dat[, pct:=n / sum(n) * 100, by=d_immcomp]
+fig4.dat[, d_studysite:=factor(d_studysite, levels=levels(prelim$d_studysite))]
+fig4.dat[, label:=ifelse(pct >= 10,
+                         paste0(as.character(d_studysite), "\n",
+                                round(pct, 0), "%"), "")]
 
-fig4 <- ggplot(fig4.dat, aes(x=d_studysite, y=pct, fill=d_immcomp)) +
-  geom_col(position="dodge", width=0.6) +
-  scale_fill_manual(values=GROUP.COLORS, labels=GROUP.LABELS) +
-  scale_y_continuous(labels=function(x) paste0(x, "%"),
-                     expand=c(0, 0), limits=c(0, 75)) +
+fig4 <- ggplot(fig4.dat,
+               aes(x=pct, y=d_immcomp, fill=d_studysite, label=label)) +
+  geom_col(color="white", linewidth=0.4) +
+  geom_text(position=position_stack(vjust=0.5),
+            size=3, lineheight=0.85, fontface="bold", color="white") +
+  scale_y_discrete(labels=GROUP.LABELS) +
+  scale_x_continuous(expand=c(0, 0), limits=c(0, 101),
+                     labels=function(x) paste0(x, "%")) +
+  scale_fill_manual(values=c(
+    "Vanderbilt"  = "#4E84C4",
+    "Rochester"   = "#6CB4A0",
+    "Cincinnati"  = "#A8C86A",
+    "Seattle"     = "#E07B39",
+    "Houston"     = "#C45E8A",
+    "Kansas City" = "#8B6BB1",
+    "Pittsburgh"  = "#B0956A")) +
   labs(title="Site enrollment",
-       subtitle="Column % within each immunocompromised group",
-       x=NULL, y="% of group") +
+       subtitle="% of enrolled patients within each immunocompromised group",
+       x=NULL, y=NULL) +
   theme.fig() +
-  theme(axis.text.x=element_text(angle=35, hjust=1))
+  theme(panel.grid.major.x=element_line(color="grey90"),
+        axis.text.y=element_text(size=11))
 
 # ── Fig 5: Virology positivity ────────────────────────────────────────────────
 
-# reshape virology results to long format for faceting
 fig5.noro <- prelim.tested[!is.na(d_norovirus), .(
   pathogen="Norovirus",
   pct.pos=mean(d_norovirus=="Positive") * 100
@@ -172,11 +190,11 @@ OUT.HEIGHT <- 5   # inches
 OUT.DPI    <- 300
 
 # individual PNGs
-ggsave("fig1_admission_rate.png",    fig1, width=OUT.WIDTH, height=OUT.HEIGHT, dpi=OUT.DPI)
-ggsave("fig2_age_distribution.png",  fig2, width=OUT.WIDTH, height=OUT.HEIGHT, dpi=OUT.DPI)
-ggsave("fig3_severity_cascade.png",  fig3, width=OUT.WIDTH * 1.4, height=OUT.HEIGHT, dpi=OUT.DPI)
-ggsave("fig4_site_enrollment.png",   fig4, width=OUT.WIDTH, height=OUT.HEIGHT, dpi=OUT.DPI)
-ggsave("fig5_virology.png",          fig5, width=OUT.WIDTH * 1.2, height=OUT.HEIGHT, dpi=OUT.DPI)
+ggsave("fig1_admission_icu_rate.png", fig1, width=OUT.WIDTH,       height=OUT.HEIGHT, dpi=OUT.DPI)
+ggsave("fig2_age_distribution.png",   fig2, width=OUT.WIDTH,       height=OUT.HEIGHT, dpi=OUT.DPI)
+ggsave("fig3_los.png",                fig3, width=OUT.WIDTH,       height=OUT.HEIGHT, dpi=OUT.DPI)
+ggsave("fig4_site_enrollment.png",    fig4, width=OUT.WIDTH,       height=OUT.HEIGHT, dpi=OUT.DPI)
+ggsave("fig5_virology.png",           fig5, width=OUT.WIDTH * 1.2, height=OUT.HEIGHT, dpi=OUT.DPI)
 
 # single PDF with all figures, one per page
 pdf("Immunocomp - Prelim Figures - Generated by Ray.pdf", width=OUT.WIDTH, height=OUT.HEIGHT)
@@ -187,4 +205,4 @@ print(fig4)
 print(fig5)
 dev.off()
 
-cat("Saved: 5 PNG files and prelim_immunocomp_figures.pdf\n")
+cat("Saved: 5 PNG files and Immunocomp - Prelim Figures - Generated by Ray.pdf\n")

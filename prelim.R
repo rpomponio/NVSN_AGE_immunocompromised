@@ -41,6 +41,7 @@ dat[, d_immcomp:=factor(immcomp, c(0, 1, 8),
 # demographics
 dat[, d_sex:=factor(sexch, 1:2, c("Male", "Female"))]
 dat[, d_agemonths:=as.numeric(c_agemonths)]
+dat[, d_age_under2:=as.integer(c_agemonths < 24)]           # derived from age
 dat[, d_diapers:=factor(diapers, 0:1, c("No", "Yes"))]      # 8 -> NA
 dat[, d_breastf:=factor(breastf, 0:1, c("No", "Yes"))]      # 8 -> NA; only asked if <5y
 dat[, d_race:=factor(c_race_intb, 1:4,
@@ -81,6 +82,10 @@ dat[!is.na(specimencol), d_lab_stool:=fcase(
   default="Not Collected")]
 
 dat[, d_tested:=(d_clin_stool=="Tested" | d_lab_stool=="Tested")]
+
+# simplify stool testing variables to binary Tested/Not Tested for tables
+dat[, d_clin_stool:=fcase(d_clin_stool=="Tested", "Tested", default="Not Tested")]
+dat[, d_lab_stool:=fcase(d_lab_stool=="Tested",   "Tested", default="Not Tested")]
 
 dat[d_tested==TRUE, d_norovirus:=fcase(
   rtpcr_norogi==1,                    "Positive",  # lab positive GI
@@ -146,38 +151,41 @@ fmt <- function(tbl) {
 
 # ── TABLE 1: Demographics ─────────────────────────────────────────────────────
 
-DEMO.VARS <- c("d_sex", "d_agemonths", "d_diapers", "d_breastf", "d_race",
-               "d_daycare", "d_insurance", "d_rotavax", "d_exposure",
+DEMO.VARS <- c("d_sex", "d_agemonths", "d_age_under2", "d_diapers", "d_breastf",
+               "d_race", "d_daycare", "d_insurance", "d_rotavax", "d_exposure",
                "d_studysite")
 DEMO.LABELS <- list(
-  d_sex       = "Sex",
-  d_agemonths = "Age, months",
-  d_diapers   = "Still wearing diapers",
-  d_breastf   = "Breastfed",
-  d_race      = "Race/Ethnicity",
-  d_daycare   = "Daycare attendance",
-  d_insurance = "Insurance type",
-  d_rotavax   = "Received rotavirus vaccine",
-  d_exposure  = "Exposure to someone with diarrhea/vomiting",
-  d_studysite = "Site")
+  d_sex        = "Sex",
+  d_agemonths  = "Age, months",
+  d_age_under2 = "Age < 2 years",
+  d_diapers    = "Still wearing diapers",
+  d_breastf    = "Breastfed",
+  d_race       = "Race/Ethnicity",
+  d_daycare    = "Daycare or school attendance",
+  d_insurance  = "Insurance type",
+  d_rotavax    = "Received rotavirus vaccine",
+  d_exposure   = "Exposure to someone with diarrhea/vomiting",
+  d_studysite  = "Site")
 
 tab.demo <- tbl_summary(
   prelim,
   by=d_immcomp,
   label=DEMO.LABELS,
   type=list(
-    d_diapers  ~ "categorical",
-    d_breastf  ~ "categorical",
-    d_daycare  ~ "categorical",
-    d_exposure ~ "categorical"),
+    d_age_under2 ~ "dichotomous",
+    d_diapers    ~ "categorical",
+    d_breastf    ~ "categorical",
+    d_daycare    ~ "categorical",
+    d_exposure   ~ "categorical"),
   include=all_of(DEMO.VARS)) |>
   add_p(test=list(
-    d_studysite ~ "chisq.test",
-    d_diapers   ~ "fisher.test",
-    d_breastf   ~ "fisher.test",
-    d_daycare   ~ "fisher.test",
-    d_exposure  ~ "fisher.test",
-    all_continuous() ~ "kruskal.test")) |>
+    d_studysite       ~ "chisq.test",
+    d_diapers         ~ "fisher.test",
+    d_breastf         ~ "fisher.test",
+    d_daycare         ~ "fisher.test",
+    d_exposure        ~ "fisher.test",
+    all_continuous()  ~ "kruskal.test",
+    all_dichotomous() ~ "fisher.test")) |>
   modify_footnote_body(
     footnote="Only asked for children < 5 years of age; missing for older children",
     columns="label",
@@ -196,13 +204,16 @@ tab.demo
 
 # ── TABLE 2: Outcomes ─────────────────────────────────────────────────────────
 
-# symptoms and hospitalization (all patients)
-OUT.ALL.VARS <- c("d_fever", "d_diarrhea", "d_vomiting", "d_admitted")
+# symptoms, hospitalization, and stool testing availability (all patients)
+OUT.ALL.VARS <- c("d_fever", "d_diarrhea", "d_vomiting", "d_admitted",
+                  "d_clin_stool", "d_lab_stool")
 OUT.ALL.LABELS <- list(
-  d_fever    = "Fever",
-  d_diarrhea = "Diarrhea",
-  d_vomiting = "Vomiting",
-  d_admitted = "Hospitalization status")
+  d_fever      = "Fever",
+  d_diarrhea   = "Diarrhea",
+  d_vomiting   = "Vomiting",
+  d_admitted   = "Hospitalization status",
+  d_clin_stool = "Any clinical stool testing",
+  d_lab_stool  = "Any laboratory stool testing")
 
 tab.out.all <- tbl_summary(
   prelim,
