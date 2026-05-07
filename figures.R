@@ -11,7 +11,7 @@
 library(ggplot2)
 library(ggpattern)
 library(data.table)
-library(scales)
+library(patchwork)
 theme_set(theme_classic(base_size=14))
 
 # run analysis script to produce prelim and prelim.tested
@@ -98,24 +98,44 @@ fig2 <- ggplot(prelim, aes(x=d_immcomp, y=d_agemonths, fill=d_immcomp)) +
        x=NULL, y="Age, months") +
   theme.fig()
 
-# ── Fig 3: Length of stay (admitted only) ─────────────────────────────────────
+# ── Fig 3: Severity among admitted patients ───────────────────────────────────
 
-# pseudo-log transformation handles zeros natively; sigma controls the linear
-# region around zero (default sigma=1 works well for integer day counts)
-fig3 <- ggplot(prelim[d_admitted=="Admitted"],
-               aes(x=d_immcomp, y=d_los, fill=d_immcomp)) +
-  geom_violin(alpha=0.4, trim=TRUE, adjust=2.5, show.legend=FALSE) +
-  geom_boxplot(width=0.15, outlier.shape=NA, show.legend=FALSE) +
+fig3.dat <- prelim[d_admitted=="Admitted", .(
+  median.los=as.numeric(median(d_los, na.rm=TRUE)),
+  q1=as.numeric(quantile(d_los, 0.25, na.rm=TRUE)),
+  q3=as.numeric(quantile(d_los, 0.75, na.rm=TRUE))
+), by=d_immcomp]
+fig3b.dat <- prelim[d_admitted=="Admitted" & !is.na(d_ivfluids), .(
+  pct.iv=mean(d_ivfluids=="Yes") * 100,
+  n=.N
+), by=d_immcomp]
+fig3b.dat[, label:=paste0(round(pct.iv, 0), "%")]
+
+fig3.los <- ggplot(fig3.dat, aes(x=d_immcomp, y=median.los,
+                                 ymin=q1, ymax=q3, color=d_immcomp)) +
+  geom_pointrange(size=1.1, show.legend=FALSE) +
+  scale_color_manual(values=GROUP.COLORS) +
+  scale_x_discrete(labels=GROUP.LABELS) +
+  labs(title=NULL, x=NULL, y="Length of stay, days") +
+  theme.fig()
+
+fig3.iv <- ggplot(fig3b.dat, aes(x=d_immcomp, y=pct.iv, fill=d_immcomp)) +
+  geom_col(width=0.5, show.legend=FALSE) +
+  geom_text(aes(label=label), vjust=-0.4, size=4.5, fontface="bold") +
   scale_fill_manual(values=GROUP.COLORS) +
   scale_x_discrete(labels=GROUP.LABELS) +
-  scale_y_continuous(
-    trans=pseudo_log_trans(sigma=1, base=10),
-    breaks=c(0, 10, 50, 100, 150),
-    labels=as.character(c(0, 10, 50, 100, 150))) +
-  labs(title="Length of stay",
-       subtitle="Admitted patients only; pseudo-log scale",
-       x=NULL, y="Days (pseudo-log scale)") +
+  scale_y_continuous(limits=c(0, 100), expand=c(0, 0),
+                     labels=function(x) paste0(x, "%")) +
+  labs(title=NULL, x=NULL, y="% received IV fluids") +
   theme.fig()
+
+fig3 <- fig3.los + fig3.iv +
+  plot_annotation(
+    title="Among admitted patients",
+    subtitle="Left: length of stay, median (IQR); Right: IV rehydration rate",
+    theme=theme(
+      plot.title=element_text(face="bold", size=13),
+      plot.subtitle=element_text(size=11, color="grey40")))
 
 # ── Fig 4: Site enrollment (stacked horizontal bars) ─────────────────────────
 
@@ -192,7 +212,7 @@ OUT.DPI    <- 300
 # individual PNGs
 ggsave("fig1_admission_icu_rate.png", fig1, width=OUT.WIDTH,       height=OUT.HEIGHT, dpi=OUT.DPI)
 ggsave("fig2_age_distribution.png",   fig2, width=OUT.WIDTH,       height=OUT.HEIGHT, dpi=OUT.DPI)
-ggsave("fig3_los.png",                fig3, width=OUT.WIDTH,       height=OUT.HEIGHT, dpi=OUT.DPI)
+ggsave("fig3_severity.png", fig3, width=OUT.WIDTH * 1.4, height=OUT.HEIGHT, dpi=OUT.DPI)
 ggsave("fig4_site_enrollment.png",    fig4, width=OUT.WIDTH,       height=OUT.HEIGHT, dpi=OUT.DPI)
 ggsave("fig5_virology.png",           fig5, width=OUT.WIDTH * 1.2, height=OUT.HEIGHT, dpi=OUT.DPI)
 
