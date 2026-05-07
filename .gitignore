@@ -52,3 +52,5 @@ rsconnect/
 *.sas7bdat
 *.csv
 *.docx
+*.png
+*.pdf

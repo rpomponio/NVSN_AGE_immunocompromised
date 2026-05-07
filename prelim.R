@@ -18,7 +18,7 @@ theme_set(theme_classic(base_size=14))
 
 # read dataset in SAS format, convert to data.table and filter to study period
 sas <- read_sas("pitt_20260413.sas7bdat")
-dat <- data.table(sas)[scrdate >= as.Date("2024-10-01")]
+dat <- data.table(sas)[scrdate >= as.Date("2024-09-01")]
 
 # ── Integrity checks ──────────────────────────────────────────────────────────
 
@@ -183,9 +183,9 @@ tab.demo <- tbl_summary(
     columns="label",
     rows=variable=="d_breastf" & row_type=="label") |>
   modify_footnote_body(
-    footnote="Season data for 2025-26 is partial thru Jan 31, 2026",
+    footnote="Seasonal data from subjects enrolled September 1, 2024 thru January 31, 2026.",
     columns="label",
-    rows=variable=="d_season" & row_type=="label") |>
+    rows=variable=="d_studysite" & row_type=="label") |>
   modify_footnote_header(
     footnote="Chi-square test used for Site; Fisher's exact test for all other categorical variables; Kruskal-Wallis test for continuous variables",
     columns="p.value") |>

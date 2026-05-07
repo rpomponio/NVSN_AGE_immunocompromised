@@ -13,7 +13,7 @@ Install [R](https://www.r-project.org) and [RStudio](https://posit.co/download/r
 The following R packages are required. Install them once from the R console:
 
 ```r
-install.packages(c("haven", "data.table", "gtsummary", "ggplot2", "officer", "flextable"))
+install.packages(c("haven", "data.table", "gtsummary", "ggplot2", "officer", "flextable", "patchwork"))
 ```
 
 ### Data
