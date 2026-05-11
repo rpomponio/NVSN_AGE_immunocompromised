@@ -137,37 +137,21 @@ fig3 <- fig3.los + fig3.iv +
       plot.title=element_text(face="bold", size=13),
       plot.subtitle=element_text(size=11, color="grey40")))
 
-# ── Fig 4: Site enrollment (stacked horizontal bars) ─────────────────────────
+# ── Fig 4: Site enrollment ────────────────────────────────────────────────
 
 fig4.dat <- prelim[, .(n=.N), by=.(d_immcomp, d_studysite)]
 fig4.dat[, pct:=n / sum(n) * 100, by=d_immcomp]
-fig4.dat[, d_studysite:=factor(d_studysite, levels=levels(prelim$d_studysite))]
-fig4.dat[, label:=ifelse(pct >= 10,
-                         paste0(as.character(d_studysite), "\n",
-                                round(pct, 0), "%"), "")]
 
-fig4 <- ggplot(fig4.dat,
-               aes(x=pct, y=d_immcomp, fill=d_studysite, label=label)) +
-  geom_col(color="white", linewidth=0.4) +
-  geom_text(position=position_stack(vjust=0.5),
-            size=3, lineheight=0.85, fontface="bold", color="white") +
-  scale_y_discrete(labels=GROUP.LABELS) +
-  scale_x_continuous(expand=c(0, 0), limits=c(0, 101),
-                     labels=function(x) paste0(x, "%")) +
-  scale_fill_manual(values=c(
-    "Vanderbilt"  = "#4E84C4",
-    "Rochester"   = "#6CB4A0",
-    "Cincinnati"  = "#A8C86A",
-    "Seattle"     = "#E07B39",
-    "Houston"     = "#C45E8A",
-    "Kansas City" = "#8B6BB1",
-    "Pittsburgh"  = "#B0956A")) +
+fig4 <- ggplot(fig4.dat, aes(x=d_studysite, y=pct, fill=d_immcomp)) +
+  geom_col(position="dodge", width=0.6) +
+  scale_fill_manual(values=GROUP.COLORS, labels=GROUP.LABELS) +
+  scale_y_continuous(labels=function(x) paste0(x, "%"),
+                     expand=c(0, 0), limits=c(0, 75)) +
   labs(title="Site enrollment",
-       subtitle="% of enrolled patients within each immunocompromised group",
-       x=NULL, y=NULL) +
+       subtitle="Column % within each immunocompromised group",
+       x=NULL, y="% of group") +
   theme.fig() +
-  theme(panel.grid.major.x=element_line(color="grey90"),
-        axis.text.y=element_text(size=11))
+  theme(axis.text.x=element_text(angle=35, hjust=1))
 
 # ── Fig 5: Virology positivity ────────────────────────────────────────────────
 
