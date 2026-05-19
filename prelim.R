@@ -17,7 +17,7 @@ theme_set(theme_classic(base_size=14))
 # ── Data ingest ───────────────────────────────────────────────────────────────
 
 # read dataset in SAS format, convert to data.table and filter to study period
-sas <- read_sas("pitt_20260413.sas7bdat")
+sas <- read_sas("data/pitt_20260413.sas7bdat")
 dat <- data.table(sas)[scrdate >= as.Date("2024-09-01")]
 
 # ── Integrity checks ──────────────────────────────────────────────────────────

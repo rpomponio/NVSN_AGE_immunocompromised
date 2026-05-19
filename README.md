@@ -6,6 +6,25 @@
 
 ## Requirements
 
+### Directory Structure
+
+./
+│   .gitignore
+│   AGE immunocompromised.Rproj
+│   README.md
+│   ...
+├───archive
+│   ...
+└───data
+        Pitt - Immunocomp - NVSN AGE_HC documentation.docx
+        pitt_20260413.sas7bdat
+        
+### Data
+
+Files in the `data/` sub-folder are NOT stored on GitHub, by design.
+
+Obtain the file `pitt_20260413.sas7bdat` and store it according to the specified directory structure.
+
 ### Software
 
 Install [R](https://www.r-project.org) and [RStudio](https://posit.co/download/rstudio-desktop) (recommended).
@@ -16,15 +35,7 @@ The following R packages are required. Install them once from the R console:
 install.packages(c("haven", "data.table", "gtsummary", "ggplot2", "officer", "flextable", "patchwork", "ggpattern"))
 ```
 
-### Data
-
-Obtain the latest dataset from CDC via the following password-protected link:
-
-<https://upmchs-my.sharepoint.com/:u:/r/personal/snyderjn4_upmc_edu/Documents/Norovirus%20in%20IC%20Patients/Datasets/ShareFile%20Download%20Apr%202026/pitt_20260413.sas7bdat?csf=1&web=1&e=oouQB4>
-
-Save the file as `pitt_20260413.sas7bdat` in the same folder as the scripts.
-
-## Reproducing the Analysis
+## Reproducing the Analysis (May 2026)
 
 Run the scripts in the following order:
 
@@ -54,10 +65,3 @@ The output file will be saved in the working directory. To check or set the work
 - Laboratory virology results use RT-PCR preferentially; clinical test results are used only when RT-PCR is unavailable. Inconclusive results are treated as missing.
 - Code was written with assistance from Claude (Anthropic); all analytical decisions were made by the author.
 
-## Answers from CDC
-
-`bf_astro` / `bf_sapo` are from BIOFIRE assays (currently no sites are testing with this assay)
-
-Mary to ask Seattle about IC Status types "Unknown"...
-
-Claire to present summary of IC enrollment at Annual Meeting (will share prior to 5/12)
